@@ -24,3 +24,77 @@ stages:
       md5: 829459716fe893ca816a3ba09f0022f0.dir
       size: 118054512
       nfiles: 2
+  data_ingestion:
+    cmd: python src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+    deps:
+    - path: config/config.yaml
+      md5: 4cc192a1b4f97dbf0288237317a7fe0e
+      size: 807
+    - path: src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+      md5: e001d1d858be8ec0e87a5023b6fc823f
+      size: 910
+    outs:
+    - path: artifacts/data_ingestion/Drosophila img dataset
+      md5: 4fd1e77073eef901dfd3971a0ff4d406.dir
+      size: 2427911
+      nfiles: 96
+  training:
+    cmd: python src/cnnClassifier/pipeline/stage_03_training.py
+    deps:
+    - path: artifacts/data_ingestion/Drosophila img dataset
+      md5: 4fd1e77073eef901dfd3971a0ff4d406.dir
+      size: 2427911
+      nfiles: 96
+    - path: artifacts/prepare_base_model
+      md5: 829459716fe893ca816a3ba09f0022f0.dir
+      size: 118054512
+      nfiles: 2
+    - path: config/config.yaml
+      md5: 4cc192a1b4f97dbf0288237317a7fe0e
+      size: 807
+    - path: src/cnnClassifier/components/prepare_callbacks.py
+      md5: cd83c53a480bab0790d682ec94262b38
+      size: 1006
+    - path: src/cnnClassifier/pipeline/stage_03_training.py
+      md5: 755837cd21710e7a8e748eee87703034
+      size: 1266
+    params:
+      params.yaml:
+        AUGMENTATION: true
+        BATCH_SIZE: 16
+        EPOCHS: 1
+        IMAGE_SIZE:
+        - 224
+        - 224
+        - 3
+    outs:
+    - path: artifacts/training/model.h5
+      md5: 7895b507bf1dfadd90053b0a84ea1663
+      size: 59337488
+  evaluation:
+    cmd: python src/cnnClassifier/pipeline/stage_04_evaluation.py
+    deps:
+    - path: artifacts/data_ingestion/Drosophila img dataset
+      md5: 4fd1e77073eef901dfd3971a0ff4d406.dir
+      size: 2427911
+      nfiles: 96
+    - path: artifacts/training/model.h5
+      md5: 7895b507bf1dfadd90053b0a84ea1663
+      size: 59337488
+    - path: config/config.yaml
+      md5: 4cc192a1b4f97dbf0288237317a7fe0e
+      size: 807
+    - path: src/cnnClassifier/pipeline/stage_04_evaluation.py
+      md5: 5dceb3a9e39ef70cc7430fe3bc41219c
+      size: 869
+    params:
+      params.yaml:
+        BATCH_SIZE: 16
+        IMAGE_SIZE:
+        - 224
+        - 224
+        - 3
+    outs:
+    - path: scores.json
+      md5: c9840ae79603425275493846f1eaee57
+      size: 57
